@@ -29,11 +29,12 @@ public protocol RequestAdapter {
     /// Inspects and adapts the specified `URLRequest` in some manner if necessary and returns the result.
     ///
     /// - parameter urlRequest: The URL request to adapt.
+    /// - parameter dataForUpload: The data for upload to adapt.
     ///
     /// - throws: An `Error` if the adaptation encounters an error.
     ///
     /// - returns: The adapted `URLRequest`.
-    func adapt(_ urlRequest: URLRequest) throws -> URLRequest
+    func adapt(_ urlRequest: URLRequest, dataForUpload: Data?) throws -> URLRequest
 }
 
 // MARK: -
@@ -576,7 +577,7 @@ open class UploadRequest: DataRequest {
 
                 switch self {
                 case let .data(data, urlRequest):
-                    let urlRequest = try urlRequest.adapt(using: adapter)
+                    let urlRequest = try urlRequest.adapt(using: adapter, dataForUpload: data)
                     task = queue.sync { session.uploadTask(with: urlRequest, from: data) }
                 case let .file(url, urlRequest):
                     let urlRequest = try urlRequest.adapt(using: adapter)

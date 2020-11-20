@@ -110,9 +110,9 @@ extension URLRequest {
         }
     }
 
-    func adapt(using adapter: RequestAdapter?) throws -> URLRequest {
+    func adapt(using adapter: RequestAdapter?, dataForUpload: Data? = nil) throws -> URLRequest {
         guard let adapter = adapter else { return self }
-        return try adapter.adapt(self)
+        return try adapter.adapt(self, dataForUpload: dataForUpload)
     }
 }
 
