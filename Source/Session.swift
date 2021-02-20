@@ -1064,7 +1064,24 @@ open class Session {
             return
         }
 
-        adapter.adapt(initialRequest, for: self) { result in
+        // Try to get data to be uploaded
+        /* BEGIN */
+        let dataToUploaded: Data?
+        let result = ((request as? UploadRequest)?.upload as? MultipartUpload)?.result
+        switch result {
+        case .success((_, let uploadable)):
+            switch uploadable {
+            case .data(let data):
+                dataToUploaded = data
+            default:
+                dataToUploaded = nil
+            }
+        default:
+            dataToUploaded = nil
+        }
+        /* END */
+
+        adapter.adapt(initialRequest, for: self, dataToUploaded: dataToUploaded) { result in
             do {
                 let adaptedRequest = try result.get()
                 try adaptedRequest.validate()

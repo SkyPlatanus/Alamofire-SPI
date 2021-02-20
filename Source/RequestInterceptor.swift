@@ -29,10 +29,11 @@ public protocol RequestAdapter {
     /// Inspects and adapts the specified `URLRequest` in some manner and calls the completion handler with the Result.
     ///
     /// - Parameters:
-    ///   - urlRequest: The `URLRequest` to adapt.
-    ///   - session:    The `Session` that will execute the `URLRequest`.
-    ///   - completion: The completion handler that must be called when adaptation is complete.
-    func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void)
+    ///   - urlRequest:     The `URLRequest` to adapt.
+    ///   - session:        The `Session` that will execute the `URLRequest`.
+    ///   - dataToUploaded: The data to be uploaded.
+    ///   - completion:     The completion handler that must be called when adaptation is complete.
+    func adapt(_ urlRequest: URLRequest, for session: Session, dataToUploaded: Data?, completion: @escaping (Result<URLRequest, Error>) -> Void)
 }
 
 // MARK: -
@@ -93,7 +94,7 @@ public protocol RequestRetrier {
 public protocol RequestInterceptor: RequestAdapter, RequestRetrier {}
 
 extension RequestInterceptor {
-    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+    public func adapt(_ urlRequest: URLRequest, for session: Session, dataToUploaded: Data?, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         completion(.success(urlRequest))
     }
 
@@ -123,7 +124,7 @@ open class Adapter: RequestInterceptor {
         self.adaptHandler = adaptHandler
     }
 
-    open func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+    open func adapt(_ urlRequest: URLRequest, for session: Session, dataToUploaded: Data?, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         adaptHandler(urlRequest, session, completion)
     }
 }
@@ -189,12 +190,13 @@ open class Interceptor: RequestInterceptor {
         self.retriers = retriers + interceptors
     }
 
-    open func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
-        adapt(urlRequest, for: session, using: adapters, completion: completion)
+    open func adapt(_ urlRequest: URLRequest, for session: Session, dataToUploaded: Data?, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+        adapt(urlRequest, for: session, dataToUploaded: dataToUploaded, using: adapters, completion: completion)
     }
 
     private func adapt(_ urlRequest: URLRequest,
                        for session: Session,
+                       dataToUploaded: Data?,
                        using adapters: [RequestAdapter],
                        completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var pendingAdapters = adapters
@@ -203,10 +205,10 @@ open class Interceptor: RequestInterceptor {
 
         let adapter = pendingAdapters.removeFirst()
 
-        adapter.adapt(urlRequest, for: session) { result in
+        adapter.adapt(urlRequest, for: session, dataToUploaded: dataToUploaded) { result in
             switch result {
             case let .success(urlRequest):
-                self.adapt(urlRequest, for: session, using: pendingAdapters, completion: completion)
+                self.adapt(urlRequest, for: session, dataToUploaded: dataToUploaded, using: pendingAdapters, completion: completion)
             case .failure:
                 completion(result)
             }

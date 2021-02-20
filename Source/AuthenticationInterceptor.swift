@@ -248,7 +248,7 @@ public class AuthenticationInterceptor<AuthenticatorType>: RequestInterceptor wh
 
     // MARK: Adapt
 
-    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+    public func adapt(_ urlRequest: URLRequest, for session: Session, dataToUploaded: Data?, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         let adaptResult: AdaptResult = $mutableState.write { mutableState in
             // Queue the adapt operation if a refresh is already in place.
             guard !mutableState.isRefreshing else {
@@ -381,7 +381,7 @@ public class AuthenticationInterceptor<AuthenticatorType>: RequestInterceptor wh
 
         // Dispatch to queue to hop out of the mutable state lock
         queue.async {
-            adaptOperations.forEach { self.adapt($0.urlRequest, for: $0.session, completion: $0.completion) }
+            adaptOperations.forEach { self.adapt($0.urlRequest, for: $0.session, dataToUploaded: nil, completion: $0.completion) }
             requestsToRetry.forEach { $0(.retry) }
         }
     }
