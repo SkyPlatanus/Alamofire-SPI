@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
-  s.name = 'Alamofire'
-  s.version = '5.4.1'
+  s.name = 'Alamofire-SPI'
+  s.version = '5.4.1.1'
   s.license = 'MIT'
   s.summary = 'Elegant HTTP Networking in Swift'
-  s.homepage = 'https://github.com/Alamofire/Alamofire'
-  s.authors = { 'Alamofire Software Foundation' => 'info@alamofire.org' }
-  s.source = { :git => 'https://github.com/Alamofire/Alamofire.git', :tag => s.version }
+  s.homepage = 'https://github.com/SkyPlatanus/Alamofire-SPI'
+  s.authors = { 'Alamofire Software Foundation' => 'info@alamofire.org', 'Leo' => 'leodaxia@gmail.com' }
+  s.source = { :git => 'https://github.com/SkyPlatanus/Alamofire-SPI.git', :tag => s.version }
   s.documentation_url = 'https://alamofire.github.io/Alamofire/'
 
   s.ios.deployment_target = '10.0'
